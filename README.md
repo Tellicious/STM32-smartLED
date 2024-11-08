@@ -1,7 +1,7 @@
 # WS2811 and WS21812B smart LED driver for STM32
 
 ### CubeMX setup:
-- Set PWM timer with 800 kHz frequency using only the autoReload register, with prescaler = 0
+- Set PWM timer with 800 kHz frequency using only the autoReload register, with prescaler = 0. Overclocking up to 1.2 MHz frequency can be achieved, but results may vary
 - Enable auto-reload preload
 - Set DMA Memory->Peripheral in circular mode, with peripheral data width `Word` and memory data width `Half Word` and with "Increment address" selected for memory
 
