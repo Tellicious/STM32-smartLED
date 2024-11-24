@@ -140,6 +140,14 @@ smartLED_retStatus_t smartLED_init(smartLED_t* smartled);
 smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, uint16_t* DMABuffer);
 
 /**
+ * \brief           Check if smart LED is still updating
+ *
+ * \param[in]       smartled: pointer to smart LED object
+ *
+ * \return          1 if smart LED is updating, 0 otherwise
+ */
+#define smartLED_isUpdating(smartled)                (smartled)->_updating
+/**
  * \brief           Set smart LED brightness
  *
  * \param[in]       smartled: pointer to smart LED object
