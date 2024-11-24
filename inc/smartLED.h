@@ -113,8 +113,7 @@ typedef struct {
     uint32_t _cyclesCnt;
     uint16_t _pulseLow, _pulseHigh; // length of 0 and 1 PWM pulses
     uint8_t _LEDBits;               // bits to define LED color (8 * num of colors)
-    uint8_t
-        _resetBlocks; // number of 1-led-transmission-time" blocks to send logical `0` to the bus, indicating reset before data transmission starts
+    uint8_t _resetBlocks; // number of 1-led-transmission-time" blocks to send logical `0` to the bus, indicating reset before data transmission starts
 } smartLED_t;
 
 /* Function prototypes -------------------------------------------------------*/
@@ -178,11 +177,11 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \param[in]       green: value of green color, from 0 to 255
  * \param[in]       blue: value of blue color, from 0 to 255
  */
-#define smartLED_updateRGBColors(smartled, item, red, green, blue)                                                     \
-    do {                                                                                                               \
-        (smartled)->_colorsData[(item) * (smartled)->type] = (red) & 0xFF;                                             \
-        (smartled)->_colorsData[(item) * (smartled)->type + 1u] = (green) & 0xFF;                                      \
-        (smartled)->_colorsData[(item) * (smartled)->type + 2u] = (blue) & 0xFF;                                       \
+#define smartLED_updateRGBColors(smartled, item, red, green, blue)                                                                                             \
+    do {                                                                                                                                                       \
+        (smartled)->_colorsData[(item) * (smartled)->type] = (red) & 0xFF;                                                                                     \
+        (smartled)->_colorsData[(item) * (smartled)->type + 1u] = (green) & 0xFF;                                                                              \
+        (smartled)->_colorsData[(item) * (smartled)->type + 2u] = (blue) & 0xFF;                                                                               \
     } while (0)
 
 /**
@@ -195,14 +194,14 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \param[in]       blue: value of blue color, from 0 to 255
  * \param[in]       white: value of white color, from 0 to 255
  */
-#define smartLED_updateRGBWColors(smartled, item, red, green, blue)                                                    \
-    do {                                                                                                               \
-        if ((smartled)->type == SMARTLED_RGBW) {                                                                       \
-            (smartled)->_colorsData[(item) * 4u] = (red) & 0xFF;                                                       \
-            (smartled)->_colorsData[(item) * 4u + 1u] = (green) & 0xFF;                                                \
-            (smartled)->_colorsData[(item) * 4u + 2u] = (blue) & 0xFF;                                                 \
-            (smartled)->_colorsData[(item) * 4u + 3u] = (white) & 0xFF;                                                \
-        }                                                                                                              \
+#define smartLED_updateRGBWColors(smartled, item, red, green, blue)                                                                                            \
+    do {                                                                                                                                                       \
+        if ((smartled)->type == SMARTLED_RGBW) {                                                                                                               \
+            (smartled)->_colorsData[(item) * 4u] = (red) & 0xFF;                                                                                               \
+            (smartled)->_colorsData[(item) * 4u + 1u] = (green) & 0xFF;                                                                                        \
+            (smartled)->_colorsData[(item) * 4u + 2u] = (blue) & 0xFF;                                                                                         \
+            (smartled)->_colorsData[(item) * 4u + 3u] = (white) & 0xFF;                                                                                        \
+        }                                                                                                                                                      \
     } while (0)
 
 /**
@@ -213,8 +212,7 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \param[in]       color: color to be changed, SMARTLED_RED, SMARTLED_GREEN, SMARTLED_BLUE, SMARTLED_WHITE
  * \param[in]       value: value of color, from 0 to 255
  */
-#define smartLED_updateColor(smartled, item, color, value)                                                             \
-    (smartled)->_colorsData[(item) * (smartled)->type + (color)] = (value) & 0xFF
+#define smartLED_updateColor(smartled, item, color, value) (smartled)->_colorsData[(item) * (smartled)->type + (color)] = (value) & 0xFF
 
 /**
  * \brief           Set RGB colors of all smart LED items
@@ -224,11 +222,11 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \param[in]       green: value of green color, from 0 to 255
  * \param[in]       blue: value of blue color, from 0 to 255
  */
-#define smartLED_updateAllRGBColors(smartled, red, green, blue)                                                        \
-    for (uint16_t ii = 0; ii < (smartled)->size; ii++) {                                                               \
-        (smartled)->_colorsData[ii * (smartled)->type] = (red) & 0xFF;                                                 \
-        (smartled)->_colorsData[ii * (smartled)->type + 1u] = (green) & 0xFF;                                          \
-        (smartled)->_colorsData[ii * (smartled)->type + 2u] = (blue) & 0xFF;                                           \
+#define smartLED_updateAllRGBColors(smartled, red, green, blue)                                                                                                \
+    for (uint16_t ii = 0; ii < (smartled)->size; ii++) {                                                                                                       \
+        (smartled)->_colorsData[ii * (smartled)->type] = (red) & 0xFF;                                                                                         \
+        (smartled)->_colorsData[ii * (smartled)->type + 1u] = (green) & 0xFF;                                                                                  \
+        (smartled)->_colorsData[ii * (smartled)->type + 2u] = (blue) & 0xFF;                                                                                   \
     }
 
 /**
@@ -240,14 +238,14 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \param[in]       blue: value of blue color, from 0 to 255
  * \param[in]       white: value of white color, from 0 to 255
  */
-#define smartLED_updateAllRGBWColors(smartled, red, green, blue, white)                                                \
-    if ((smartled)->type == SMARTLED_RGBW) {                                                                           \
-        for (uint16_t ii = 0; ii < (smartled)->size; ii++) {                                                           \
-            (smartled)->_colorsData[ii * 4u] = (red) & 0xFF;                                                           \
-            (smartled)->_colorsData[ii * 4u + 1u] = (green) & 0xFF;                                                    \
-            (smartled)->_colorsData[ii * 4u + 2u] = (blue) & 0xFF;                                                     \
-            (smartled)->_colorsData[ii * 4u + 3u] = (white) & 0xFF;                                                    \
-        }                                                                                                              \
+#define smartLED_updateAllRGBWColors(smartled, red, green, blue, white)                                                                                        \
+    if ((smartled)->type == SMARTLED_RGBW) {                                                                                                                   \
+        for (uint16_t ii = 0; ii < (smartled)->size; ii++) {                                                                                                   \
+            (smartled)->_colorsData[ii * 4u] = (red) & 0xFF;                                                                                                   \
+            (smartled)->_colorsData[ii * 4u + 1u] = (green) & 0xFF;                                                                                            \
+            (smartled)->_colorsData[ii * 4u + 2u] = (blue) & 0xFF;                                                                                             \
+            (smartled)->_colorsData[ii * 4u + 3u] = (white) & 0xFF;                                                                                            \
+        }                                                                                                                                                      \
     }
 
 /**

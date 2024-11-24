@@ -52,17 +52,13 @@ static smartLED_retStatus_t smartLED_fillDMABuffer(smartLED_t* smartled, uint16_
 
     uint8_t r, g, b;
 
-    r = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 0] * (uint32_t)smartled->_brightness)
-                  / (uint32_t)0xFF);
-    g = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 1] * (uint32_t)smartled->_brightness)
-                  / (uint32_t)0xFF);
-    b = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 2] * (uint32_t)smartled->_brightness)
-                  / (uint32_t)0xFF);
+    r = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 0] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
+    g = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 1] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
+    b = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 2] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
     for (uint32_t ii = 0; ii < 8; ii++) {
         smartled->_dmaBuffer[startingIdx + ii] = (g & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
         smartled->_dmaBuffer[startingIdx + 8 + ii] = (r & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
-        smartled->_dmaBuffer[startingIdx + 16 + ii] =
-            (b & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
+        smartled->_dmaBuffer[startingIdx + 16 + ii] = (b & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
     }
     return SMARTLED_SUCCESS;
 }
@@ -163,15 +159,6 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
     return SMARTLED_SUCCESS;
 }
 
-/*smartLED_retStatus_t smartLED_updateColor(smartLED_t* smartled, uint16_t item, smartLEDColor_t color, uint32_t value) {
-    if (item >= smartled->size) {
-        return SMARTLED_ERROR;
-    }
-    smartled->_colorsData[item * smartled->type + color] = value & 0xFF;
-
-    return SMARTLED_SUCCESS;
-}*/
-
 smartLED_retStatus_t smartLED_startTransfer(smartLED_t* smartled) {
     if (smartled->_updating) {
         return SMARTLED_ERROR;
@@ -189,11 +176,9 @@ smartLED_retStatus_t smartLED_startTransfer(smartLED_t* smartled) {
 
     /* Start Transfer */
     if (smartled->timType == SMARTLED_TIMER_NORMAL) {
-        HAL_TIM_PWM_Start_DMA(smartled->htim, smartled->timChannel, (uint32_t*)smartled->_dmaBuffer,
-                              2 * smartled->LEDperIRQ * smartled->_LEDBits);
+        HAL_TIM_PWM_Start_DMA(smartled->htim, smartled->timChannel, (uint32_t*)smartled->_dmaBuffer, 2 * smartled->LEDperIRQ * smartled->_LEDBits);
     } else {
-        HAL_TIMEx_PWMN_Start_DMA(smartled->htim, smartled->timChannel, (uint32_t*)smartled->_dmaBuffer,
-                                 2 * smartled->LEDperIRQ * smartled->_LEDBits);
+        HAL_TIMEx_PWMN_Start_DMA(smartled->htim, smartled->timChannel, (uint32_t*)smartled->_dmaBuffer, 2 * smartled->LEDperIRQ * smartled->_LEDBits);
     }
     return SMARTLED_SUCCESS;
 }
@@ -215,8 +200,7 @@ smartLED_retStatus_t smartLED_updateTransfer(smartLED_t* smartled, smartLEDIRQTy
         if ((smartled->_cyclesCnt + smartled->LEDperIRQ) > smartled->_resetBlocks) {
             uint32_t index = smartled->_resetBlocks - smartled->_cyclesCnt;
             for (uint16_t ii = 0; index < smartled->LEDperIRQ && ii < smartled->size; ++index, ++ii) {
-                smartLED_fillDMABuffer(
-                    smartled, ii, PWM_IRQ * DMABuffHalfCpltLen + (index % smartled->LEDperIRQ) * smartled->_LEDBits);
+                smartLED_fillDMABuffer(smartled, ii, PWM_IRQ * DMABuffHalfCpltLen + (index % smartled->LEDperIRQ) * smartled->_LEDBits);
             }
         }
     } else if (smartled->_cyclesCnt < (smartled->_resetBlocks + smartled->size)) {
