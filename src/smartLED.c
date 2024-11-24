@@ -92,8 +92,8 @@ smartLED_retStatus_t smartLED_init(smartLED_t* smartled) {
     }
 
     smartled->_brightness = 0xFF;
-    smartled->_pulseLow = (1 * (smartled->htim->Instance->ARR + 1) / 4) - 1;
-    smartled->_pulseHigh = (3 * (smartled->htim->Instance->ARR + 1) / 4) - 1;
+    smartled->_pulseLow = (uint16_t)((float)smartled->htim->Instance->ARR * 0.33f);
+    smartled->_pulseHigh = (uint16_t)((float)smartled->htim->Instance->ARR * 0.65f);
     smartled->_LEDBits = smartled->type * 8;
 
     /* Set the right amount of empty LED blocks needed at the beginning to initiate transfer */
@@ -143,8 +143,8 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
     }
 
     smartled->_brightness = 0xFF;
-    smartled->_pulseLow = (1 * (smartled->htim->Instance->ARR + 1) / 4) - 1;
-    smartled->_pulseHigh = (3 * (smartled->htim->Instance->ARR + 1) / 4) - 1;
+    smartled->_pulseLow = (uint16_t)((float)smartled->htim->Instance->ARR * 0.33f);
+    smartled->_pulseHigh = (uint16_t)((float)smartled->htim->Instance->ARR * 0.65f);
     smartled->_LEDBits = smartled->type * 8;
 
     /* Set the right amount of empty LED blocks needed at the beginning to initiate transfer */
