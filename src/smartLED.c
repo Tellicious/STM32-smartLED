@@ -51,14 +51,16 @@ static smartLED_retStatus_t smartLED_fillDMABuffer(smartLED_t* smartled, uint16_
     }
 
     uint8_t r, g, b;
+    uint32_t itemIdx = item * smartled->type;
 
-    r = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 0] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
-    g = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 1] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
-    b = (uint8_t)(((uint32_t)smartled->_colorsData[item * smartled->type + 2] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
-    for (uint32_t ii = 0; ii < 8; ii++) {
-        smartled->_dmaBuffer[startingIdx + ii] = (g & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
-        smartled->_dmaBuffer[startingIdx + 8 + ii] = (r & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
-        smartled->_dmaBuffer[startingIdx + 16 + ii] = (b & (1 << (7 - ii))) ? smartled->_pulseHigh : smartled->_pulseLow;
+    r = (uint8_t)(((uint32_t)smartled->_colorsData[itemIdx] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
+    g = (uint8_t)(((uint32_t)smartled->_colorsData[itemIdx + 1] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
+    b = (uint8_t)(((uint32_t)smartled->_colorsData[itemIdx + 2] * (uint32_t)smartled->_brightness) / (uint32_t)0xFF);
+
+    for (uint32_t ii = startingIdx, jj = 7; ii < (8 + startingIdx); ii++, jj--) {
+        smartled->_dmaBuffer[ii] = (g & (1 << jj)) ? smartled->_pulseHigh : smartled->_pulseLow;
+        smartled->_dmaBuffer[ii + 8] = (r & (1 << jj)) ? smartled->_pulseHigh : smartled->_pulseLow;
+        smartled->_dmaBuffer[ii + 16] = (b & (1 << jj)) ? smartled->_pulseHigh : smartled->_pulseLow;
     }
     return SMARTLED_SUCCESS;
 }
@@ -147,7 +149,7 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
     smartled->_pulseHigh = (uint16_t)((float)smartled->htim->Instance->ARR * 0.65f);
     smartled->_LEDBits = smartled->type * 8;
 
-    /* Set the right amount of empty LED blocks needed at the beginning to initiate transfer */
+    /* Set the right amount of empty LED blocks needed between two consecutive transfers */
     if (smartled->chip == WS2811) {
         smartled->_resetBlocks = 280e-3 * SMARTLED_PWM_FREQ / smartled->_LEDBits + 2;
     } else {
@@ -170,8 +172,8 @@ smartLED_retStatus_t smartLED_startTransfer(smartLED_t* smartled) {
 
     /* Fill the entire DMA buffer with the first set of elements */
     memset(smartled->_dmaBuffer, 0x00, sizeof(uint16_t) * 2u * smartled->LEDperIRQ * smartled->_LEDBits);
-    for (uint16_t ii = 0, index = smartled->_resetBlocks; index < 2 * smartled->LEDperIRQ; ++index, ++ii) {
-        smartLED_fillDMABuffer(smartled, ii, index * smartled->_LEDBits);
+    for (uint16_t ii = 0; ii < 2 * smartled->LEDperIRQ; ii++) {
+        smartLED_fillDMABuffer(smartled, ii, ii * smartled->_LEDBits);
     }
 
     /* Start Transfer */
@@ -195,31 +197,24 @@ smartLED_retStatus_t smartLED_updateTransfer(smartLED_t* smartled, smartLEDIRQTy
      * The increment of _cyclesCnt is anticipated compared to the actual transfer */
     smartled->_cyclesCnt += smartled->LEDperIRQ;
 
-    if (smartled->_cyclesCnt < smartled->_resetBlocks) {
-        /* Still in reset sequence. Fill with first LEDs if resetBlocks is not aligned with DMA buffer size */
-        if ((smartled->_cyclesCnt + smartled->LEDperIRQ) > smartled->_resetBlocks) {
-            uint32_t index = smartled->_resetBlocks - smartled->_cyclesCnt;
-            for (uint16_t ii = 0; index < smartled->LEDperIRQ && ii < smartled->size; ++index, ++ii) {
-                smartLED_fillDMABuffer(smartled, ii, PWM_IRQ * DMABuffHalfCpltLen + (index % smartled->LEDperIRQ) * smartled->_LEDBits);
-            }
-        }
-    } else if (smartled->_cyclesCnt < (smartled->_resetBlocks + smartled->size)) {
-        uint16_t next_led = smartled->_cyclesCnt - smartled->_resetBlocks;
+    if (smartled->_cyclesCnt < smartled->size) {
+        uint16_t next_led = smartled->_cyclesCnt;
         uint8_t counter = 0;
+        uint32_t startIdx = PWM_IRQ * DMABuffHalfCpltLen;
 
-        /* Fill buffer with led data, paying attention to alignment with pre and post reset blocks*/
-        for (; counter < smartled->LEDperIRQ && next_led < smartled->size; ++counter, ++next_led) {
-            smartLED_fillDMABuffer(smartled, next_led, PWM_IRQ * DMABuffHalfCpltLen + counter * smartled->_LEDBits);
+        /* Fill buffer with led data, paying attention to alignment with post reset blocks*/
+        for (; counter < smartled->LEDperIRQ && next_led < smartled->size; counter++, next_led++) {
+            smartLED_fillDMABuffer(smartled, next_led, startIdx + counter * smartled->_LEDBits);
         }
         if (counter < smartled->LEDperIRQ) {
-            memset(&(smartled->_dmaBuffer[PWM_IRQ * DMABuffHalfCpltLen + counter * smartled->_LEDBits]), 0x00,
+            memset(&(smartled->_dmaBuffer[startIdx + counter * smartled->_LEDBits]), 0x00,
                    sizeof(uint16_t) * (smartled->LEDperIRQ - counter) * smartled->type * 8u);
         }
-    } else if (smartled->_cyclesCnt < (2u * smartled->_resetBlocks + smartled->size + smartled->LEDperIRQ)) {
+    } else if (smartled->_cyclesCnt < (uint32_t)(smartled->_resetBlocks + smartled->size + smartled->LEDperIRQ)) {
         /* Reset array to all zeros after transfer is complete 
          * Reset happens just once, not to waste CPU resources 
          * It assumes to send at least another _resetBlocks number of empty LED blocks after transfer is completed */
-        if (smartled->_cyclesCnt < (smartled->_resetBlocks + smartled->size + 2u * smartled->LEDperIRQ)) {
+        if (smartled->_cyclesCnt < (smartled->size + 2u * smartled->LEDperIRQ)) {
             memset(&(smartled->_dmaBuffer[PWM_IRQ * DMABuffHalfCpltLen]), 0x00, sizeof(uint16_t) * DMABuffHalfCpltLen);
         }
     } else {
