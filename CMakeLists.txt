@@ -12,12 +12,12 @@ cmake_minimum_required(VERSION 3.22)
 set (libName smartLED)
 
 set(${libName}_src
-    ${CMAKE_CURRENT_LIST_DIR}/src/smartLED.c
+    ${CMAKE_CURRENT_LIST_DIR}/smartLED.c
 )
 
 # Setup include directories
 set(${libName}_inc
-    ${CMAKE_CURRENT_LIST_DIR}/inc
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 
 # Register library to the system
