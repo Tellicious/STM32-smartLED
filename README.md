@@ -3,7 +3,7 @@
 ### CubeMX setup:
 - Set PWM timer with 800 kHz frequency using only the autoReload register, with prescaler = 0. Overclocking up to 1.2 MHz frequency can be achieved, but results may vary
 - Enable auto-reload preload
-- Set DMA Memory->Peripheral in circular mode, with peripheral data width `Word` and memory data width `Half Word` and with "Increment address" selected for memory
+- Set DMA Memory->Peripheral in circular mode, with peripheral data width `Word` and memory data width `Byte` and with "Increment address" selected for memory
 
 ### Example usage:
 - Initialization:
@@ -57,4 +57,4 @@
 | htim           | Pointer to PWM timer handle                                        | &htim1                                               |
 | timType        | Type of PWM timer: normal or extended (N channels)                 | `SMARTLED_TIMER_NORMAL` or `SMARTLED_TIMER_EXTENDED` |
 | timChannel     | Timer channel number                                               | TIM_CHANNEL_3                                        |
-| LEDperIRQ      | Number of LED blocks to be sent between two consecutive interrupts | Suggested from 1 to 10                               |
+| LEDperIRQ      | Number of LED blocks to be sent between two consecutive interrupts | Suggested from 5 to 10                               |

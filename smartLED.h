@@ -107,11 +107,11 @@ typedef struct {
     uint8_t LEDperIRQ; // number of LEDs to be updated per each PWM IRQ
     /* Private */
     uint8_t* _colorsData;
-    uint16_t* _dmaBuffer;
+    uint8_t* _dmaBuffer;
     uint8_t _brightness;
     uint8_t _updating;
     uint32_t _cyclesCnt;
-    uint16_t _pulseLow, _pulseHigh; // length of 0 and 1 PWM pulses
+    uint8_t _pulseLow, _pulseHigh; // length of 0 and 1 PWM pulses
     uint8_t _LEDBits;               // bits to define LED color (8 * num of colors)
     uint8_t _resetBlocks; // number of 1-led-transmission-time" blocks to send logical `0` to the bus, indicating reset before data transmission starts
 } smartLED_t;
@@ -136,7 +136,7 @@ smartLED_retStatus_t smartLED_init(smartLED_t* smartled);
  *
  * \return          SMARTLED_SUCCESS if parameters are configured correctly, SMARTLED_ERROR otherwise
  */
-smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, uint16_t* DMABuffer);
+smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, uint8_t* DMABuffer);
 
 /**
  * \brief           Check if smart LED is still updating
