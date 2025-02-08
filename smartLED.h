@@ -112,8 +112,8 @@ typedef struct {
     uint8_t _updating;
     uint32_t _cyclesCnt;
     uint8_t _pulseLow, _pulseHigh; // length of 0 and 1 PWM pulses
-    uint8_t _LEDBits;               // bits to define LED color (8 * num of colors)
-    uint8_t _resetBlocks; // number of 1-led-transmission-time" blocks to send logical `0` to the bus, indicating reset before data transmission starts
+    uint8_t _LEDBits;              // bits to define LED color (8 * num of colors)
+    uint8_t _resetBlocks;          // number of 1-led-transmission-time" blocks to send logical `0` to the bus, indicating reset before data transmission starts
 } smartLED_t;
 
 /* Function prototypes -------------------------------------------------------*/
@@ -256,6 +256,36 @@ smartLED_retStatus_t smartLED_initStatic(smartLED_t* smartled, uint8_t* data, ui
  * \return          SMARTLED_SUCCESS if transfer can be initiated, SMARTLED_ERROR otherwise
  */
 smartLED_retStatus_t smartLED_startTransfer(smartLED_t* smartled);
+
+/**
+ * \brief           Wait until data transfer to smart LED is successfully completed
+ *
+ * \param[in]       smartled: pointer to smart LED object
+ * \param[in]       pause: time to wait before retrying to start transfer
+ */
+#define smartLED_waitStartComplete(smartled, pause)                                                                                                            \
+    do {                                                                                                                                                       \
+        while (smartLED_startTransfer(smartled) != SMARTLED_SUCCESS) {                                                                                         \
+            HAL_Delay(pause);                                                                                                                                  \
+        }                                                                                                                                                      \
+    } while (0)
+
+/**
+ * \brief           Start data transfer to smart LED and wait for transfer complete
+ *
+ * \param[in]       smartled: pointer to smart LED object
+ * \param[in]       pause: time to wait before retrying to start transfer
+ * \param[in]       wait: time to wait before checking if transfer is completed
+ */
+#define smartLED_startTransferAndWait(smartled, pause, wait)                                                                                                   \
+    do {                                                                                                                                                       \
+        while (smartLED_startTransfer(smartled) != SMARTLED_SUCCESS) {                                                                                         \
+            HAL_Delay(pause);                                                                                                                                  \
+        }                                                                                                                                                      \
+        while (smartLED_isUpdating(smartled)) {                                                                                                                \
+            HAL_Delay(wait);                                                                                                                                   \
+        }                                                                                                                                                      \
+    } while (0)
 
 /**
  * \brief           Update DMA buffer according to defined LED sequence
